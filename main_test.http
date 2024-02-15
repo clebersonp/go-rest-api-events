@@ -16,3 +16,15 @@ Content-Type: application/json
 
 ### Get event by ID
 GET http://localhost:8080/events/1
+
+
+### Update an event
+PUT http://localhost:8080/events/1
+Content-Type: application/json
+
+{
+  "name": "test3",
+  "description": "test3",
+  "location": "test3",
+  "date_time": "1985-03-02T15:30:00.000Z"
+}
