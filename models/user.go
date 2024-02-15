@@ -48,7 +48,7 @@ func (u *User) Save() error {
 
 func (u *User) ValidateCredentials() (bool, error) {
 	query := `
-		SELECT u.password FROM users u WHERE u.email = ?
+		SELECT u.id, u.password FROM users u WHERE u.email = ?
 	`
 
 	row := db.DB.QueryRow(query, u.Email)
@@ -57,13 +57,13 @@ func (u *User) ValidateCredentials() (bool, error) {
 	}
 
 	var hashedPassword string
-	err := row.Scan(&hashedPassword)
+	// get and set the user id to u pointer to instance of user struct
+	err := row.Scan(&u.ID, &hashedPassword)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
 		return false, err
 	}
-
 	return utils.CheckPasswordHash(hashedPassword, u.Password), nil
 }
