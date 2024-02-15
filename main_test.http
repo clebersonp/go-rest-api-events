@@ -1,0 +1,14 @@
+### Get all events
+GET http://localhost:8080/events
+
+
+### Create an event
+POST http://localhost:8080/events
+Content-Type: application/json
+
+{
+  "name": "test3",
+  "description": "test3",
+  "location": "test3",
+  "date_time": "1985-03-02T15:30:00.000Z"
+}
