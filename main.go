@@ -8,6 +8,7 @@ import (
 )
 
 // to install the third-party Gin package to project: go get -u github.com/gin-gonic/gin
+// to study: https://www.jetbrains.com/guide/go/tutorials/rest_api_series/gin/
 
 func main() {
 
