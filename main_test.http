@@ -12,3 +12,7 @@ Content-Type: application/json
   "location": "test3",
   "date_time": "1985-03-02T15:30:00.000Z"
 }
+
+
+### Get event by ID
+GET http://localhost:8080/events/1
