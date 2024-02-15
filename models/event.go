@@ -68,3 +68,25 @@ func GetAllEvents() ([]Event, error) {
 
 	return events, nil
 }
+
+func GetEventByID(id int64) (*Event, error) {
+	query := `SELECT * FROM events e WHERE e.id = ?`
+
+	row := db.DB.QueryRow(query, id)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	e := &Event{}
+	err := row.Scan(&e.ID, &e.Name, &e.Description, &e.Location, &e.DateTime, &e.UserID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			e = nil
+		} else {
+			return nil, err
+		}
+	}
+
+	// result or no result, and no error
+	return e, nil
+}
