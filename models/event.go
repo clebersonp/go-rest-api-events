@@ -58,6 +58,7 @@ func GetAllEvents() ([]Event, error) {
 	var events []Event
 	for rows.Next() {
 		e := Event{}
+		// the order to be passed need to be the same of column declaration on DDL of table
 		err = rows.Scan(&e.ID, &e.Name, &e.Description, &e.Location, &e.DateTime, &e.UserID)
 		if err != nil {
 			return nil, err
