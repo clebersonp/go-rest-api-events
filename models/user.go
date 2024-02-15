@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"example.com/rest-api-events/db"
 	"example.com/rest-api-events/utils"
 )
@@ -43,4 +44,26 @@ func (u *User) Save() error {
 
 	u.ID = id
 	return err
+}
+
+func (u *User) ValidateCredentials() (bool, error) {
+	query := `
+		SELECT u.password FROM users u WHERE u.email = ?
+	`
+
+	row := db.DB.QueryRow(query, u.Email)
+	if row.Err() != nil {
+		return false, row.Err()
+	}
+
+	var hashedPassword string
+	err := row.Scan(&hashedPassword)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return utils.CheckPasswordHash(hashedPassword, u.Password), nil
 }
