@@ -1,6 +1,7 @@
 package main
 
 import (
+	"example.com/rest-api-events/db"
 	"example.com/rest-api-events/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,9 @@ import (
 // to study: https://www.jetbrains.com/guide/go/tutorials/rest_api_series/gin/
 
 func main() {
+
+	// initialize DB connection
+	db.InitDB()
 
 	server := gin.Default()
 
