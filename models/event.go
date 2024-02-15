@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"example.com/rest-api-events/db"
 	"time"
 )
@@ -89,4 +90,33 @@ func GetEventByID(id int64) (*Event, error) {
 
 	// result or no result, and no error
 	return e, nil
+}
+
+func (e *Event) Update() error {
+	query := `UPDATE events
+	SET name = ?, description = ?, location = ?, date_time = ?
+	WHERE id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer func(s *sql.Stmt) {
+		_ = s.Close()
+	}(stmt)
+
+	result, err := stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.ID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected <= 0 || rowsAffected > 1 {
+		return errors.New(" Something went wrong. Try again later")
+	}
+	return nil
 }
