@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 // to install the third-party Gin package to project: go get -u github.com/gin-gonic/gin
@@ -20,6 +21,7 @@ func main() {
 
 	// call via curl: curl -s -X GET "http://localhost:8080/events" | json_pp
 	server.GET("/events", getEvents)
+	server.GET("/events/:id", getEventByID)
 	server.POST("/events", createEvent)
 
 	err := server.Run(":8080") // by default will be localhost:
@@ -58,4 +60,25 @@ func createEvent(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusCreated, gin.H{"message": "Event created!", "event": event})
+}
+
+func getEventByID(context *gin.Context) {
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
+		return
+	}
+
+	event, err := models.GetEventByID(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event by ID!", "error": err})
+		return
+	}
+
+	if event == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Event Not Found!", "error": err})
+		return
+	}
+
+	context.JSON(http.StatusOK, event)
 }
