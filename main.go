@@ -32,7 +32,13 @@ func main() {
 // getEvents - will be used as named function by handler
 func getEvents(context *gin.Context) {
 	// with gin all we need to do we do with context
-	context.JSON(http.StatusOK, models.GetAllEvents())
+	events, err := models.GetAllEvents()
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not retrieve data", "error": err})
+		return
+	}
+	context.JSON(http.StatusOK, events)
 }
 
 func createEvent(context *gin.Context) {
@@ -45,8 +51,11 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	event.ID = 1
 	event.UserID = 1
-	event.Save()
+	err = event.Save()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event!", "error": err})
+		return
+	}
 	context.JSON(http.StatusCreated, gin.H{"message": "Event created!", "event": event})
 }
