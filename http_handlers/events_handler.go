@@ -1,4 +1,4 @@
-package routes
+package http_handlers
 
 import (
 	"example.com/rest-api-events/models"
@@ -14,7 +14,7 @@ func convertToInt64(context *gin.Context, parameterName string) (num int64, err 
 }
 
 // GetEvents - will be used as named function by handler
-func getEvents(context *gin.Context) {
+func GetEvents(context *gin.Context) {
 	// with gin all we need to do we do with context
 	events, err := models.GetAllEvents()
 
@@ -25,7 +25,7 @@ func getEvents(context *gin.Context) {
 	context.JSON(http.StatusOK, events)
 }
 
-func createEvent(context *gin.Context) {
+func CreateEvent(context *gin.Context) {
 	event := models.Event{}
 	err := context.ShouldBindJSON(&event)
 
@@ -43,7 +43,7 @@ func createEvent(context *gin.Context) {
 	context.JSON(http.StatusCreated, gin.H{"message": "Event created!", "event": event})
 }
 
-func getEventByID(context *gin.Context) {
+func GetEventByID(context *gin.Context) {
 	id, err := convertToInt64(context, "id")
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
@@ -64,7 +64,7 @@ func getEventByID(context *gin.Context) {
 	context.JSON(http.StatusOK, event)
 }
 
-func updateEvent(context *gin.Context) {
+func UpdateEvent(context *gin.Context) {
 	id, err := convertToInt64(context, "id")
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
@@ -98,7 +98,7 @@ func updateEvent(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!"})
 }
 
-func deleteEvent(context *gin.Context) {
+func DeleteEvent(context *gin.Context) {
 	id, err := convertToInt64(context, "id")
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
