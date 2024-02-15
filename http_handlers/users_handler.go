@@ -2,6 +2,7 @@ package http_handlers
 
 import (
 	"example.com/rest-api-events/models"
+	"example.com/rest-api-events/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -40,8 +41,14 @@ func Login(context *gin.Context) {
 	}
 
 	if !isValid {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized!", "error": err})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized!"})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "User logged!"})
+
+	token, err := utils.GenerateToken(user.ID, user.Email)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized!"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"token": token})
 }
