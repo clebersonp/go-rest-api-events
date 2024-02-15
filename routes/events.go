@@ -19,7 +19,7 @@ func getEvents(context *gin.Context) {
 	events, err := models.GetAllEvents()
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not retrieve data", "error": err})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not retrieve data", "error": err.Error()})
 		return
 	}
 	context.JSON(http.StatusOK, events)
@@ -31,14 +31,14 @@ func createEvent(context *gin.Context) {
 
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
 	event.UserID = 1
 	err = event.Save()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event!", "error": err})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event!", "error": err.Error()})
 		return
 	}
 	context.JSON(http.StatusCreated, gin.H{"message": "Event created!", "event": event})
@@ -53,7 +53,7 @@ func getEventByID(context *gin.Context) {
 
 	event, err := models.GetEventByID(id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event by ID!", "error": err})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get event by ID!", "error": err.Error()})
 		return
 	}
 
@@ -74,7 +74,7 @@ func updateEvent(context *gin.Context) {
 
 	eventDb, err := models.GetEventByID(id)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get eventDb by ID!", "error": err})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get eventDb by ID!", "error": err.Error()})
 		return
 	}
 	if eventDb == nil {
@@ -86,7 +86,7 @@ func updateEvent(context *gin.Context) {
 	err = context.ShouldBindJSON(&updatedEvent)
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err})
+		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
@@ -97,4 +97,29 @@ func updateEvent(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!"})
+}
+
+func deleteEvent(context *gin.Context) {
+	id, err := convertToInt64(context, "id")
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
+		return
+	}
+
+	eventDb, err := models.GetEventByID(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get eventDb by ID!", "error": err.Error()})
+		return
+	}
+	if eventDb == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Event Not Found!", "error": err})
+		return
+	}
+
+	err = eventDb.Delete()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not delete event!", "error": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully!"})
 }
