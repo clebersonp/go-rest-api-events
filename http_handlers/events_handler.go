@@ -32,13 +32,13 @@ func CreateEvent(context *gin.Context) {
 	token, found := strings.CutPrefix(authorization, "Bearer ")
 
 	if authorization == "" || !found {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not unauthorized"})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
 		return
 	}
 
-	err := utils.VerifyToken(token)
+	userId, err := utils.VerifyToken(token)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not unauthorized"})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
 		return
 	}
 
@@ -51,6 +51,8 @@ func CreateEvent(context *gin.Context) {
 		return
 	}
 
+	// set the userId that is requiring to save this event
+	event.UserID = userId
 	err = event.Save()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event!", "error": err.Error()})
