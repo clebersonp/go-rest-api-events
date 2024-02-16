@@ -93,6 +93,14 @@ func UpdateEvent(context *gin.Context) {
 	}
 
 	updatedEvent.ID = id
+
+	// get userId from this context keys from auth middleware
+	userId := context.GetInt64("user_id")
+	if eventDb.UserID != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "Not authorized to update this event", "error": nil})
+		return
+	}
+
 	err = updatedEvent.Update()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update event", "error": err.Error()})
@@ -115,6 +123,13 @@ func DeleteEvent(context *gin.Context) {
 	}
 	if eventDb == nil {
 		context.JSON(http.StatusNotFound, gin.H{"message": "Event Not Found!", "error": err})
+		return
+	}
+
+	// get userId from this context keys from auth middleware
+	userId := context.GetInt64("user_id")
+	if eventDb.UserID != userId {
+		context.JSON(http.StatusForbidden, gin.H{"message": "Not authorized to delete this event", "error": nil})
 		return
 	}
 
