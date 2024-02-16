@@ -140,3 +140,34 @@ func DeleteEvent(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Event deleted successfully!"})
 }
+
+func RegisterForEvent(context *gin.Context) {
+	id, err := convertToInt64(context, "id")
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
+		return
+	}
+
+	eventDb, err := models.GetEventByID(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get eventDb by ID!", "error": err.Error()})
+		return
+	}
+	if eventDb == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Event Not Found!", "error": err})
+		return
+	}
+
+	// userId from context auth middleware
+	userId := context.GetInt64("user_id")
+	err = eventDb.Register(userId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not register event!", "error": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Event registered successfully!"})
+}
+
+func CancelRegistration(context *gin.Context) {
+
+}
