@@ -41,13 +41,13 @@ func Login(context *gin.Context) {
 	}
 
 	if !isValid {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized!"})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
 		return
 	}
 
 	token, err := utils.GenerateToken(user.ID, user.Email)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "User unauthorized!"})
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"token": token})
