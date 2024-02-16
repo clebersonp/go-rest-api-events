@@ -13,7 +13,7 @@ func Signup(context *gin.Context) {
 	err := context.ShouldBindJSON(&user)
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
@@ -30,7 +30,7 @@ func Login(context *gin.Context) {
 	err := context.ShouldBindJSON(&user)
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
