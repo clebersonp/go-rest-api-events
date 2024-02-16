@@ -158,3 +158,51 @@ func (e *Event) Register(userId int64) error {
 	}
 	return err
 }
+
+func (e *Event) CancelRegistration(userId int64) error {
+	query := `DELETE FROM registrations WHERE event_id = ? AND user_id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer func(s *sql.Stmt) {
+		_ = s.Close()
+	}(stmt)
+
+	_, err = stmt.Exec(e.ID, userId)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (e *Event) GetIdRegistration(userId int64) (*int64, error) {
+	query := `SELECT id FROM registrations WHERE event_id = ? AND user_id = ?`
+
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(s *sql.Stmt) {
+		_ = s.Close()
+	}(stmt)
+
+	row := stmt.QueryRow(e.ID, userId)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var registrationId *int64
+	err = row.Scan(&registrationId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return registrationId, nil
+}
