@@ -2,10 +2,12 @@ package http_handlers
 
 import (
 	"example.com/rest-api-events/models"
+	"example.com/rest-api-events/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // In this file we create all handler function for endpoint registered into routes.go file
@@ -26,8 +28,22 @@ func GetEvents(context *gin.Context) {
 }
 
 func CreateEvent(context *gin.Context) {
+	authorization := context.Request.Header.Get("Authorization")
+	token, found := strings.CutPrefix(authorization, "Bearer ")
+
+	if authorization == "" || !found {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not unauthorized"})
+		return
+	}
+
+	err := utils.VerifyToken(token)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not unauthorized"})
+		return
+	}
+
 	event := models.Event{}
-	err := context.ShouldBindJSON(&event)
+	err = context.ShouldBindJSON(&event)
 
 	if err != nil {
 		fmt.Println(err)
