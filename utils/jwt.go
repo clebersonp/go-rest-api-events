@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"strconv"
 	"time"
 )
 
@@ -14,7 +13,7 @@ const secretKey = "superSecret"
 
 func GenerateToken(userId int64, email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": strconv.FormatInt(userId, 10),
+		"user_id": userId,
 		"email":   email,
 		"exp":     time.Now().Add(time.Hour * 2).Unix(),
 	})
@@ -23,7 +22,7 @@ func GenerateToken(userId int64, email string) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func VerifyToken(tokenString string) error {
+func VerifyToken(tokenString string) (int64, error) {
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// syntax to check the type assertion: type.(anotherType)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -46,23 +45,22 @@ func VerifyToken(tokenString string) error {
 	})
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if !parsedToken.Valid {
-		return errors.New("invalid token")
+		return 0, errors.New("invalid token")
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return errors.New("invalid token claims type")
+		return 0, errors.New("invalid token claims type")
 	}
 
 	// we could make any database perform with these user data
 	// try to get the value of type string
 	email := claims["email"].(string)
-	userIdString := claims["user_id"].(string)
-	userId, _ := strconv.ParseInt(userIdString, 10, 64)
+	userId := int64(claims["user_id"].(float64))
 	fmt.Printf("Token verification. Email: %v, User_ID: %v\n", email, userId)
-	return nil
+	return userId, nil
 }
