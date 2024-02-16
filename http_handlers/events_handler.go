@@ -2,12 +2,10 @@ package http_handlers
 
 import (
 	"example.com/rest-api-events/models"
-	"example.com/rest-api-events/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 // In this file we create all handler function for endpoint registered into routes.go file
@@ -28,17 +26,10 @@ func GetEvents(context *gin.Context) {
 }
 
 func CreateEvent(context *gin.Context) {
-	authorization := context.Request.Header.Get("Authorization")
-	token, found := strings.CutPrefix(authorization, "Bearer ")
-
-	if authorization == "" || !found {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
-		return
-	}
-
-	userId, err := utils.VerifyToken(token)
+	// get userId from this context keys
+	userId, err := strconv.ParseInt(context.Keys["user_id"].(string), 10, 64)
 	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authorized"})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse user data", "error": err.Error()})
 		return
 	}
 
@@ -47,11 +38,11 @@ func CreateEvent(context *gin.Context) {
 
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
-	// set the userId that is requiring to save this event
+	// set the userId that is requiring to save this event from this context
 	event.UserID = userId
 	err = event.Save()
 	if err != nil {
@@ -103,14 +94,14 @@ func UpdateEvent(context *gin.Context) {
 	err = context.ShouldBindJSON(&updatedEvent)
 	if err != nil {
 		fmt.Println(err)
-		context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse data", "error": err.Error()})
 		return
 	}
 
 	updatedEvent.ID = id
 	err = updatedEvent.Update()
 	if err != nil {
-		context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": "Failed to update event", "error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update event", "error": err.Error()})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{"message": "Event updated successfully!"})
