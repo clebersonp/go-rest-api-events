@@ -5,6 +5,7 @@ GET http://localhost:8080/events
 ### Create an event
 POST http://localhost:8080/events
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiZXhwIjoxNzA4MDQ5Mzk2LCJ1c2VyX2lkIjoiMiJ9.qx0PXTc_KEvW1eMToXhYtnApfc0T0gowWfqgEtiLUgY
 
 {
   "name": "test3",
