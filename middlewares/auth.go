@@ -4,7 +4,6 @@ import (
 	"example.com/rest-api-events/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -24,6 +23,6 @@ func Authenticate(context *gin.Context) {
 	}
 
 	// set to context the user_id as key-value
-	context.Set("user_id", strconv.FormatInt(userId, 10))
+	context.Set("user_id", userId)
 	context.Next()
 }
