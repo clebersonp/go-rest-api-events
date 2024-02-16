@@ -40,3 +40,8 @@ Authorization: Bearer {{token}}
 ### Register an event to logged in user
 POST http://localhost:8080/events/11/register
 Authorization: Bearer {{token}}
+
+
+### Cancel Registration of an event to logged in user
+DELETE http://localhost:8080/events/11/register
+Authorization: Bearer {{token}}
