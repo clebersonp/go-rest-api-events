@@ -26,15 +26,8 @@ func GetEvents(context *gin.Context) {
 }
 
 func CreateEvent(context *gin.Context) {
-	// get userId from this context keys
-	userId, err := strconv.ParseInt(context.Keys["user_id"].(string), 10, 64)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Failed to parse user data", "error": err.Error()})
-		return
-	}
-
 	event := models.Event{}
-	err = context.ShouldBindJSON(&event)
+	err := context.ShouldBindJSON(&event)
 
 	if err != nil {
 		fmt.Println(err)
@@ -43,7 +36,8 @@ func CreateEvent(context *gin.Context) {
 	}
 
 	// set the userId that is requiring to save this event from this context
-	event.UserID = userId
+	// get userId from this context keys
+	event.UserID = context.GetInt64("user_id")
 	err = event.Save()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not create event!", "error": err.Error()})
