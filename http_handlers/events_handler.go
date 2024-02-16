@@ -160,14 +160,52 @@ func RegisterForEvent(context *gin.Context) {
 
 	// userId from context auth middleware
 	userId := context.GetInt64("user_id")
+
+	// verify if the event registration already exists
+	registrationId, err := eventDb.GetIdRegistration(userId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not get registration id!", "error": err.Error()})
+		return
+	}
+	if registrationId != nil {
+		context.JSON(http.StatusConflict, gin.H{"message": "User already registered for this event"})
+		return
+	}
+
 	err = eventDb.Register(userId)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not register event!", "error": err.Error()})
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Event registered successfully!"})
+	context.JSON(http.StatusCreated, gin.H{"message": "Event registered successfully!"})
 }
 
 func CancelRegistration(context *gin.Context) {
+	eventId, err := convertToInt64(context, "id")
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "ID can't converted to integer!", "error": err.Error()})
+		return
+	}
 
+	// userId from context auth middleware
+	userId := context.GetInt64("user_id")
+	var eventCanceled models.Event
+	eventCanceled.ID = eventId
+
+	registrationId, err := eventCanceled.GetIdRegistration(userId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not cancel register!", "error": err.Error()})
+		return
+	}
+	if registrationId == nil {
+		context.JSON(http.StatusNotFound, gin.H{"message": "Registration Not Found!", "error": err})
+		return
+	}
+
+	err = eventCanceled.CancelRegistration(userId)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not register event!", "error": err.Error()})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Event registration canceled successfully!"})
 }
